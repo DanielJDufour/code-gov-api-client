@@ -20,6 +20,9 @@ var CodeGovAPIClient = /** @class */ (function () {
         if (this.DEBUG)
             console.log("this.BASE:", this.BASE);
     }
+    CodeGovAPIClient.prototype.getAgenciesUrl = function () {
+        return this.BASE + "agencies";
+    };
     /**
     * This function gets all the agencies on code.gov
     * @name getAgencies
@@ -31,9 +34,12 @@ var CodeGovAPIClient = /** @class */ (function () {
     * });
     */
     CodeGovAPIClient.prototype.getAgencies = function () {
-        return fetch(this.BASE + "agencies")
+        return fetch(this.getAgenciesUrl())
             .then(function (response) { return response.json(); })
             .then(function (data) { return data.agencies; });
+    };
+    CodeGovAPIClient.prototype.getAgencyReposUrl = function (agency_id, size) {
+        return this.BASE + ("repos?agency.acronym=" + agency_id + "&size=" + size + "&sort=name__asc");
     };
     /**
     * This function gets all the repositories
@@ -55,12 +61,15 @@ var CodeGovAPIClient = /** @class */ (function () {
         /*
           - permissions.usageType is "openSource" or "governmentWideReuse"
         */
-        var url = this.BASE + ("repos?agency.acronym=" + agency_id + "&size=" + size + "&sort=name__asc");
+        var url = this.getAgencyReposUrl(agency_id, size);
         if (this.DEBUG)
             console.log("getAgencyRepos: url:", url);
         return fetch(url)
             .then(function (response) { return response.json(); })
             .then(function (data) { return data.repos; });
+    };
+    CodeGovAPIClient.prototype.getRepoByIDUrl = function (repo_id) {
+        return this.BASE + ("repos/" + repo_id);
     };
     /**
     * This function gets a repository by its id
@@ -76,7 +85,7 @@ var CodeGovAPIClient = /** @class */ (function () {
     */
     CodeGovAPIClient.prototype.getRepoByID = function (repo_id) {
         if (repo_id === void 0) { repo_id = ""; }
-        var url = this.BASE + ("repos/" + repo_id);
+        var url = this.getRepoByIDUrl(repo_id);
         return fetch(url).then(function (response) { return response.json(); });
     };
     /**
@@ -108,6 +117,9 @@ var CodeGovAPIClient = /** @class */ (function () {
             return Promise.resolve([]);
         }
     };
+    CodeGovAPIClient.prototype.getSearchUrl = function (text, size) {
+        return this.BASE + ("repos?q=" + text + "&size=" + size);
+    };
     /**
      * This function searches all of the repositories
      * based on a string of text.
@@ -123,7 +135,7 @@ var CodeGovAPIClient = /** @class */ (function () {
         if (text === void 0) { text = ""; }
         if (size === void 0) { size = 10; }
         if (text && text.length > 0) {
-            var url = this.BASE + ("repos?q=" + text + "&size=" + size);
+            var url = this.getSearchUrl(text, size);
             if (this.DEBUG)
                 console.log("result repos:", url);
             return fetch(url).then(function (response) { return response.json(); });
@@ -132,4 +144,10 @@ var CodeGovAPIClient = /** @class */ (function () {
     return CodeGovAPIClient;
 }());
 exports.CodeGovAPIClient = CodeGovAPIClient;
+var AngularCodeGovAPIClient = /** @class */ (function () {
+    function AngularCodeGovAPIClient() {
+    }
+    return AngularCodeGovAPIClient;
+}());
+exports.AngularCodeGovAPIClient = AngularCodeGovAPIClient;
 //# sourceMappingURL=index.js.map

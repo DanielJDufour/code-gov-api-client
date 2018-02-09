@@ -28,6 +28,10 @@ export class CodeGovAPIClient {
 
     if (this.DEBUG) console.log("this.BASE:", this.BASE);
   }
+  
+  getAgenciesUrl() {
+    return this.BASE + "agencies";
+  }
 
   /**
   * This function gets all the agencies on code.gov
@@ -40,9 +44,13 @@ export class CodeGovAPIClient {
   * });
   */
   getAgencies(){
-    return fetch(this.BASE + "agencies")
+    return fetch(this.getAgenciesUrl())
       .then(response => response.json())
       .then(data => data.agencies);
+  }
+  
+  getAgencyReposUrl(agency_id: string, size: number){
+    return this.BASE + `repos?agency.acronym=${agency_id}&size=${size}&sort=name__asc`;
   }
 
   /**
@@ -63,11 +71,15 @@ export class CodeGovAPIClient {
     /*
       - permissions.usageType is "openSource" or "governmentWideReuse"
     */
-    let url = this.BASE + `repos?agency.acronym=${agency_id}&size=${size}&sort=name__asc`;
+    let url = this.getAgencyReposUrl(agency_id, size);
     if (this.DEBUG) console.log("getAgencyRepos: url:", url);
     return fetch(url)
       .then(response => response.json())
       .then(data => data.repos);
+  }
+  
+  getRepoByIDUrl(repo_id: string): string {
+    return this.BASE + `repos/${repo_id}`;
   }
 
   /**
@@ -83,7 +95,7 @@ export class CodeGovAPIClient {
   * });
   */
   getRepoByID(repo_id="") {
-    let url = this.BASE + `repos/${repo_id}`;
+    let url = this.getRepoByIDUrl(repo_id);
     return fetch(url).then(response => response.json());
   }
 
@@ -112,6 +124,10 @@ export class CodeGovAPIClient {
       return Promise.resolve([]);
     }
   }
+  
+  getSearchUrl(text: string, size: number) {
+    return this.BASE + `repos?q=${text}&size=${size}`;
+  }
 
   /**
    * This function searches all of the repositories
@@ -126,10 +142,15 @@ export class CodeGovAPIClient {
    */
    search(text="", size=10) {
      if (text && text.length > 0) {
-       let url = this.BASE + `repos?q=${text}&size=${size}`;
+       let url = this.getSearchUrl(text, size);
        if (this.DEBUG) console.log("result repos:", url);
        return fetch(url).then(response => response.json());
      }
    }
 
+}
+
+
+export class AngularCodeGovAPIClient {
+  
 }
